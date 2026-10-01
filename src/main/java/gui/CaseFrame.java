@@ -1,7 +1,9 @@
 package gui;
 
 import dao.CaseDAO;
+import dao.DetectiveDAO;
 import model.Case;
+import model.Detective;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,7 +16,9 @@ public class CaseFrame extends JFrame {
     private JTextField titleField;
     private JTextArea descriptionArea;
     private JComboBox<String> statusBox;
-    private JTextField detectiveIdField;
+    private JComboBox<String> detectiveBox;
+
+    private List<Detective> detectives;
 
     private JButton addButton;
     private JButton viewButton;
@@ -22,10 +26,11 @@ public class CaseFrame extends JFrame {
     public CaseFrame() {
 
         setTitle("Case Management");
-        setSize(600, 500);
+        setSize(650, 550);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
+        // HEADING
         JLabel headingLabel = new JLabel(
                 "Case Management",
                 SwingConstants.CENTER
@@ -35,117 +40,255 @@ public class CaseFrame extends JFrame {
                 new Font("Arial", Font.BOLD, 22)
         );
 
+        headingLabel.setBorder(
+                BorderFactory.createEmptyBorder(15, 10, 10, 10)
+        );
+
+        // FORM PANEL
         JPanel formPanel = new JPanel(
                 new GridLayout(5, 2, 10, 10)
         );
 
         formPanel.setBorder(
-                BorderFactory.createEmptyBorder(20, 30, 20, 30)
+                BorderFactory.createEmptyBorder(20, 40, 20, 40)
         );
 
         caseNumberField = new JTextField();
         titleField = new JTextField();
-        descriptionArea = new JTextArea(3, 20);
+
+        descriptionArea = new JTextArea(4, 20);
+        descriptionArea.setLineWrap(true);
+        descriptionArea.setWrapStyleWord(true);
 
         statusBox = new JComboBox<>(
-                new String[]{"Open", "Closed", "Pending"}
+                new String[]{
+                        "Open",
+                        "Closed",
+                        "Pending"
+                }
         );
 
-        detectiveIdField = new JTextField();
+        detectiveBox = new JComboBox<>();
 
-        formPanel.add(new JLabel("Case Number:"));
+        loadDetectives();
+
+        formPanel.add(
+                new JLabel("Case Number:")
+        );
         formPanel.add(caseNumberField);
 
-        formPanel.add(new JLabel("Title:"));
+        formPanel.add(
+                new JLabel("Title:")
+        );
         formPanel.add(titleField);
 
-        formPanel.add(new JLabel("Description:"));
-        formPanel.add(new JScrollPane(descriptionArea));
+        formPanel.add(
+                new JLabel("Description:")
+        );
+        formPanel.add(
+                new JScrollPane(descriptionArea)
+        );
 
-        formPanel.add(new JLabel("Status:"));
+        formPanel.add(
+                new JLabel("Status:")
+        );
         formPanel.add(statusBox);
 
-        formPanel.add(new JLabel("Detective ID:"));
-        formPanel.add(detectiveIdField);
+        formPanel.add(
+                new JLabel("Assigned Detective:")
+        );
+        formPanel.add(detectiveBox);
 
+        // BUTTONS
         addButton = new JButton("Add Case");
         viewButton = new JButton("View Cases");
 
+        addButton.setFont(
+                new Font("Arial", Font.BOLD, 14)
+        );
+
+        viewButton.setFont(
+                new Font("Arial", Font.BOLD, 14)
+        );
+
         JPanel buttonPanel = new JPanel();
+
+        buttonPanel.setBorder(
+                BorderFactory.createEmptyBorder(10, 10, 15, 10)
+        );
 
         buttonPanel.add(addButton);
         buttonPanel.add(viewButton);
 
+        // MAIN LAYOUT
         setLayout(new BorderLayout());
 
-        add(headingLabel, BorderLayout.NORTH);
-        add(formPanel, BorderLayout.CENTER);
-        add(buttonPanel, BorderLayout.SOUTH);
+        add(
+                headingLabel,
+                BorderLayout.NORTH
+        );
 
-        addButton.addActionListener(e -> addCase());
+        add(
+                formPanel,
+                BorderLayout.CENTER
+        );
 
-        viewButton.addActionListener(e -> viewCases());
+        add(
+                buttonPanel,
+                BorderLayout.SOUTH
+        );
+
+        // BUTTON ACTIONS
+        addButton.addActionListener(
+                e -> addCase()
+        );
+
+        viewButton.addActionListener(
+                e -> viewCases()
+        );
     }
 
+    // LOAD DETECTIVES FROM DATABASE
+    private void loadDetectives() {
 
+        DetectiveDAO detectiveDAO =
+                new DetectiveDAO();
+
+        detectives =
+                detectiveDAO.getAllDetectives();
+
+        if (detectives.isEmpty()) {
+
+            detectiveBox.addItem(
+                    "No detectives available"
+            );
+
+            return;
+        }
+
+        for (Detective detective : detectives) {
+
+            detectiveBox.addItem(
+                    detective.getPersonId()
+                            + " - "
+                            + detective.getName()
+            );
+        }
+    }
+
+    // ADD CASE
     private void addCase() {
 
-        String caseNumber = caseNumberField.getText();
-        String title = titleField.getText();
-        String description = descriptionArea.getText();
-        String status = (String) statusBox.getSelectedItem();
-        String detectiveText = detectiveIdField.getText();
+        String caseNumber =
+                caseNumberField.getText().trim();
 
-        if (caseNumber.isEmpty() || title.isEmpty()) {
+        String title =
+                titleField.getText().trim();
+
+        String description =
+                descriptionArea.getText().trim();
+
+        String status =
+                (String) statusBox.getSelectedItem();
+
+        // VALIDATE BASIC FIELDS
+        if (caseNumber.isEmpty() ||
+                title.isEmpty()) {
 
             JOptionPane.showMessageDialog(
                     this,
-                    "Case Number and Title are required!"
+                    "Case Number and Title are required!",
+                    "Validation",
+                    JOptionPane.WARNING_MESSAGE
             );
 
             return;
         }
 
-        int detectiveId;
-
-        try {
-
-            detectiveId = Integer.parseInt(detectiveText);
-
-        } catch (NumberFormatException e) {
+        // CHECK DETECTIVE
+        if (detectives.isEmpty()) {
 
             JOptionPane.showMessageDialog(
                     this,
-                    "Detective ID must be a number!"
+                    "No detectives are available. Please add a detective first.",
+                    "Validation",
+                    JOptionPane.WARNING_MESSAGE
             );
 
             return;
         }
 
-        Case newCase = new Case();
+        int selectedIndex =
+                detectiveBox.getSelectedIndex();
 
-        newCase.setCaseNumber(caseNumber);
-        newCase.setTitle(title);
-        newCase.setDescription(description);
-        newCase.setStatus(status);
-        newCase.setDateCreated(LocalDate.now());
-        newCase.setDetectiveId(detectiveId);
+        if (selectedIndex < 0 ||
+                selectedIndex >= detectives.size()) {
 
-        CaseDAO caseDAO = new CaseDAO();
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please select a detective.",
+                    "Validation",
+                    JOptionPane.WARNING_MESSAGE
+            );
 
-        boolean success = caseDAO.addCase(newCase);
+            return;
+        }
+
+        Detective selectedDetective =
+                detectives.get(selectedIndex);
+
+        int detectiveId =
+                selectedDetective.getPersonId();
+
+        // CREATE CASE OBJECT
+        Case newCase =
+                new Case();
+
+        newCase.setCaseNumber(
+                caseNumber
+        );
+
+        newCase.setTitle(
+                title
+        );
+
+        newCase.setDescription(
+                description
+        );
+
+        newCase.setStatus(
+                status
+        );
+
+        newCase.setDateCreated(
+                LocalDate.now()
+        );
+
+        newCase.setDetectiveId(
+                detectiveId
+        );
+
+        // SAVE TO DATABASE
+        CaseDAO caseDAO =
+                new CaseDAO();
+
+        boolean success =
+                caseDAO.addCase(newCase);
 
         if (success) {
 
             JOptionPane.showMessageDialog(
                     this,
-                    "Case added successfully!"
+                    "Case added successfully!",
+                    "Success",
+                    JOptionPane.INFORMATION_MESSAGE
             );
 
+            // CLEAR FORM
             caseNumberField.setText("");
             titleField.setText("");
             descriptionArea.setText("");
-            detectiveIdField.setText("");
+            statusBox.setSelectedIndex(0);
 
         } else {
 
@@ -158,12 +301,14 @@ public class CaseFrame extends JFrame {
         }
     }
 
-
+    // VIEW ALL CASES
     private void viewCases() {
 
-        CaseDAO caseDAO = new CaseDAO();
+        CaseDAO caseDAO =
+                new CaseDAO();
 
-        List<Case> cases = caseDAO.getAllCases();
+        List<Case> cases =
+                caseDAO.getAllCases();
 
         if (cases.isEmpty()) {
 
@@ -175,51 +320,88 @@ public class CaseFrame extends JFrame {
             return;
         }
 
-        StringBuilder caseDetails = new StringBuilder();
+        StringBuilder caseDetails =
+                new StringBuilder();
 
         for (Case caseData : cases) {
 
-            caseDetails.append("Case ID: ")
-                    .append(caseData.getCaseId())
+            caseDetails.append(
+                            "Case ID: "
+                    )
+                    .append(
+                            caseData.getCaseId()
+                    )
                     .append("\n");
 
-            caseDetails.append("Case Number: ")
-                    .append(caseData.getCaseNumber())
+            caseDetails.append(
+                            "Case Number: "
+                    )
+                    .append(
+                            caseData.getCaseNumber()
+                    )
                     .append("\n");
 
-            caseDetails.append("Title: ")
-                    .append(caseData.getTitle())
+            caseDetails.append(
+                            "Title: "
+                    )
+                    .append(
+                            caseData.getTitle()
+                    )
                     .append("\n");
 
-            caseDetails.append("Description: ")
-                    .append(caseData.getDescription())
+            caseDetails.append(
+                            "Description: "
+                    )
+                    .append(
+                            caseData.getDescription()
+                    )
                     .append("\n");
 
-            caseDetails.append("Status: ")
-                    .append(caseData.getStatus())
+            caseDetails.append(
+                            "Status: "
+                    )
+                    .append(
+                            caseData.getStatus()
+                    )
                     .append("\n");
 
-            caseDetails.append("Date Created: ")
-                    .append(caseData.getDateCreated())
+            caseDetails.append(
+                            "Date Created: "
+                    )
+                    .append(
+                            caseData.getDateCreated()
+                    )
                     .append("\n");
 
-            caseDetails.append("Detective ID: ")
-                    .append(caseData.getDetectiveId())
+            caseDetails.append(
+                            "Detective ID: "
+                    )
+                    .append(
+                            caseData.getDetectiveId()
+                    )
                     .append("\n");
 
-            caseDetails.append("--------------------------------\n");
+            caseDetails.append(
+                    "--------------------------------\n"
+            );
         }
 
-        JTextArea textArea = new JTextArea(
-                caseDetails.toString()
-        );
+        JTextArea textArea =
+                new JTextArea(
+                        caseDetails.toString()
+                );
 
         textArea.setEditable(false);
 
-        JScrollPane scrollPane = new JScrollPane(textArea);
+        textArea.setFont(
+                new Font("Arial", Font.PLAIN, 14)
+        );
+
+        JScrollPane scrollPane =
+                new JScrollPane(textArea);
 
         scrollPane.setPreferredSize(
-                new Dimension(500, 400)
+                new Dimension(550, 400)
         );
 
         JOptionPane.showMessageDialog(

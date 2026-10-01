@@ -1,6 +1,8 @@
 package gui;
 
+import dao.CaseDAO;
 import dao.EvidenceDAO;
+import model.Case;
 import model.Evidence;
 
 import javax.swing.*;
@@ -10,7 +12,7 @@ import java.util.List;
 
 public class EvidenceFrame extends JFrame {
 
-    private JTextField caseIdField;
+    private JComboBox<String> caseBox;
     private JTextField typeField;
     private JTextArea descriptionArea;
     private JTextField locationField;
@@ -18,10 +20,12 @@ public class EvidenceFrame extends JFrame {
     private JButton addButton;
     private JButton viewButton;
 
+    private List<Case> cases;
+
     public EvidenceFrame() {
 
         setTitle("Evidence Management");
-        setSize(600, 500);
+        setSize(650, 520);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -34,21 +38,33 @@ public class EvidenceFrame extends JFrame {
                 new Font("Arial", Font.BOLD, 22)
         );
 
+        headingLabel.setBorder(
+                BorderFactory.createEmptyBorder(15, 10, 10, 10)
+        );
+
         JPanel formPanel = new JPanel(
                 new GridLayout(4, 2, 10, 10)
         );
 
         formPanel.setBorder(
-                BorderFactory.createEmptyBorder(30, 40, 20, 40)
+                BorderFactory.createEmptyBorder(25, 50, 20, 50)
         );
 
-        caseIdField = new JTextField();
+        // Case dropdown
+        caseBox = new JComboBox<>();
+
+        loadCases();
+
         typeField = new JTextField();
-        descriptionArea = new JTextArea(3, 20);
+
+        descriptionArea = new JTextArea(4, 20);
+        descriptionArea.setLineWrap(true);
+        descriptionArea.setWrapStyleWord(true);
+
         locationField = new JTextField();
 
-        formPanel.add(new JLabel("Case ID:"));
-        formPanel.add(caseIdField);
+        formPanel.add(new JLabel("Case:"));
+        formPanel.add(caseBox);
 
         formPanel.add(new JLabel("Evidence Type:"));
         formPanel.add(typeField);
@@ -62,7 +78,19 @@ public class EvidenceFrame extends JFrame {
         addButton = new JButton("Add Evidence");
         viewButton = new JButton("View Evidence");
 
+        addButton.setFont(
+                new Font("Arial", Font.BOLD, 14)
+        );
+
+        viewButton.setFont(
+                new Font("Arial", Font.BOLD, 14)
+        );
+
         JPanel buttonPanel = new JPanel();
+
+        buttonPanel.setBorder(
+                BorderFactory.createEmptyBorder(10, 10, 15, 10)
+        );
 
         buttonPanel.add(addButton);
         buttonPanel.add(viewButton);
@@ -76,40 +104,90 @@ public class EvidenceFrame extends JFrame {
         addButton.addActionListener(e -> addEvidence());
 
         viewButton.addActionListener(e -> viewEvidence());
+
+        locationField.addActionListener(e -> addEvidence());
+    }
+
+    private void loadCases() {
+
+        CaseDAO caseDAO = new CaseDAO();
+
+        cases = caseDAO.getAllCases();
+
+        if (cases.isEmpty()) {
+
+            caseBox.addItem("No cases available");
+
+            return;
+        }
+
+        for (Case caseData : cases) {
+
+            caseBox.addItem(
+                    caseData.getCaseId()
+                            + " - "
+                            + caseData.getCaseNumber()
+                            + " - "
+                            + caseData.getTitle()
+            );
+        }
     }
 
     private void addEvidence() {
 
-        String caseIdText = caseIdField.getText();
-        String type = typeField.getText();
-        String description = descriptionArea.getText();
-        String location = locationField.getText();
+        String type = typeField.getText().trim();
 
-        if (caseIdText.isEmpty() || type.isEmpty()) {
+        String description =
+                descriptionArea.getText().trim();
+
+        String location =
+                locationField.getText().trim();
+
+        if (cases.isEmpty()) {
 
             JOptionPane.showMessageDialog(
                     this,
-                    "Case ID and Evidence Type are required!"
+                    "No cases are available. Please add a case first.",
+                    "Validation",
+                    JOptionPane.WARNING_MESSAGE
             );
 
             return;
         }
 
-        int caseId;
-
-        try {
-
-            caseId = Integer.parseInt(caseIdText);
-
-        } catch (NumberFormatException e) {
+        if (type.isEmpty()) {
 
             JOptionPane.showMessageDialog(
                     this,
-                    "Case ID must be a number!"
+                    "Evidence Type is required!",
+                    "Validation",
+                    JOptionPane.WARNING_MESSAGE
             );
 
             return;
         }
+
+        int selectedIndex =
+                caseBox.getSelectedIndex();
+
+        if (selectedIndex < 0 ||
+                selectedIndex >= cases.size()) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please select a case.",
+                    "Validation",
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            return;
+        }
+
+        Case selectedCase =
+                cases.get(selectedIndex);
+
+        int caseId =
+                selectedCase.getCaseId();
 
         Evidence evidence = new Evidence();
 
@@ -119,18 +197,21 @@ public class EvidenceFrame extends JFrame {
         evidence.setLocationFound(location);
         evidence.setDateCollected(LocalDate.now());
 
-        EvidenceDAO evidenceDAO = new EvidenceDAO();
+        EvidenceDAO evidenceDAO =
+                new EvidenceDAO();
 
-        boolean success = evidenceDAO.addEvidence(evidence);
+        boolean success =
+                evidenceDAO.addEvidence(evidence);
 
         if (success) {
 
             JOptionPane.showMessageDialog(
                     this,
-                    "Evidence added successfully!"
+                    "Evidence added successfully!",
+                    "Success",
+                    JOptionPane.INFORMATION_MESSAGE
             );
 
-            caseIdField.setText("");
             typeField.setText("");
             descriptionArea.setText("");
             locationField.setText("");
@@ -148,7 +229,8 @@ public class EvidenceFrame extends JFrame {
 
     private void viewEvidence() {
 
-        EvidenceDAO evidenceDAO = new EvidenceDAO();
+        EvidenceDAO evidenceDAO =
+                new EvidenceDAO();
 
         List<Evidence> evidenceList =
                 evidenceDAO.getAllEvidence();
@@ -163,7 +245,11 @@ public class EvidenceFrame extends JFrame {
             return;
         }
 
-        StringBuilder details = new StringBuilder();
+        StringBuilder details =
+                new StringBuilder();
+
+        details.append("EVIDENCE RECORDS\n");
+        details.append("================================\n\n");
 
         for (Evidence evidence : evidenceList) {
 
@@ -194,17 +280,21 @@ public class EvidenceFrame extends JFrame {
             details.append("--------------------------------\n");
         }
 
-        JTextArea textArea = new JTextArea(
-                details.toString()
-        );
+        JTextArea textArea =
+                new JTextArea(details.toString());
 
         textArea.setEditable(false);
+        textArea.setLineWrap(true);
+        textArea.setWrapStyleWord(true);
+        textArea.setFont(
+                new Font("Arial", Font.PLAIN, 14)
+        );
 
         JScrollPane scrollPane =
                 new JScrollPane(textArea);
 
         scrollPane.setPreferredSize(
-                new Dimension(500, 400)
+                new Dimension(550, 400)
         );
 
         JOptionPane.showMessageDialog(
