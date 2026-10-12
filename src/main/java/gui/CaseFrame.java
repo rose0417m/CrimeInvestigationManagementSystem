@@ -1,429 +1,20 @@
-//package gui;
-//
-//import dao.CaseDAO;
-//import dao.DetectiveDAO;
-//import model.Case;
-//import model.Detective;
-//
-//import javax.swing.*;
-//import java.awt.*;
-//import java.time.LocalDate;
-//import java.util.List;
-//
-//public class CaseFrame extends JFrame {
-//
-//    private JTextField caseNumberField;
-//    private JTextField titleField;
-//    private JTextArea descriptionArea;
-//    private JComboBox<String> statusBox;
-//    private JComboBox<String> detectiveBox;
-//
-//    private List<Detective> detectives;
-//
-//    private JButton addButton;
-//    private JButton viewButton;
-//
-//    public CaseFrame() {
-//
-//        setTitle("Case Management");
-//        setSize(650, 550);
-//        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-//        setLocationRelativeTo(null);
-//
-//        // HEADING
-//        JLabel headingLabel = new JLabel(
-//                "Case Management",
-//                SwingConstants.CENTER
-//        );
-//
-//        headingLabel.setFont(
-//                new Font("Arial", Font.BOLD, 22)
-//        );
-//
-//        headingLabel.setBorder(
-//                BorderFactory.createEmptyBorder(15, 10, 10, 10)
-//        );
-//
-//        // FORM PANEL
-//        JPanel formPanel = new JPanel(
-//                new GridLayout(5, 2, 10, 10)
-//        );
-//
-//        formPanel.setBorder(
-//                BorderFactory.createEmptyBorder(20, 40, 20, 40)
-//        );
-//
-//        caseNumberField = new JTextField();
-//        titleField = new JTextField();
-//
-//        descriptionArea = new JTextArea(4, 20);
-//        descriptionArea.setLineWrap(true);
-//        descriptionArea.setWrapStyleWord(true);
-//
-//        statusBox = new JComboBox<>(
-//                new String[]{
-//                        "Open",
-//                        "Closed",
-//                        "Pending"
-//                }
-//        );
-//
-//        detectiveBox = new JComboBox<>();
-//
-//        loadDetectives();
-//
-//        formPanel.add(
-//                new JLabel("Case Number:")
-//        );
-//        formPanel.add(caseNumberField);
-//
-//        formPanel.add(
-//                new JLabel("Title:")
-//        );
-//        formPanel.add(titleField);
-//
-//        formPanel.add(
-//                new JLabel("Description:")
-//        );
-//        formPanel.add(
-//                new JScrollPane(descriptionArea)
-//        );
-//
-//        formPanel.add(
-//                new JLabel("Status:")
-//        );
-//        formPanel.add(statusBox);
-//
-//        formPanel.add(
-//                new JLabel("Assigned Detective:")
-//        );
-//        formPanel.add(detectiveBox);
-//
-//        // BUTTONS
-//        addButton = new JButton("Add Case");
-//        viewButton = new JButton("View Cases");
-//
-//        addButton.setFont(
-//                new Font("Arial", Font.BOLD, 14)
-//        );
-//
-//        viewButton.setFont(
-//                new Font("Arial", Font.BOLD, 14)
-//        );
-//
-//        JPanel buttonPanel = new JPanel();
-//
-//        buttonPanel.setBorder(
-//                BorderFactory.createEmptyBorder(10, 10, 15, 10)
-//        );
-//
-//        buttonPanel.add(addButton);
-//        buttonPanel.add(viewButton);
-//
-//        // MAIN LAYOUT
-//        setLayout(new BorderLayout());
-//
-//        add(
-//                headingLabel,
-//                BorderLayout.NORTH
-//        );
-//
-//        add(
-//                formPanel,
-//                BorderLayout.CENTER
-//        );
-//
-//        add(
-//                buttonPanel,
-//                BorderLayout.SOUTH
-//        );
-//
-//        // BUTTON ACTIONS
-//        addButton.addActionListener(
-//                e -> addCase()
-//        );
-//
-//        viewButton.addActionListener(
-//                e -> viewCases()
-//        );
-//    }
-//
-//    // LOAD DETECTIVES FROM DATABASE
-//    private void loadDetectives() {
-//
-//        DetectiveDAO detectiveDAO =
-//                new DetectiveDAO();
-//
-//        detectives =
-//                detectiveDAO.getAllDetectives();
-//
-//        if (detectives.isEmpty()) {
-//
-//            detectiveBox.addItem(
-//                    "No detectives available"
-//            );
-//
-//            return;
-//        }
-//
-//        for (Detective detective : detectives) {
-//
-//            detectiveBox.addItem(
-//                    detective.getPersonId()
-//                            + " - "
-//                            + detective.getName()
-//            );
-//        }
-//    }
-//
-//    // ADD CASE
-//    private void addCase() {
-//
-//        String caseNumber =
-//                caseNumberField.getText().trim();
-//
-//        String title =
-//                titleField.getText().trim();
-//
-//        String description =
-//                descriptionArea.getText().trim();
-//
-//        String status =
-//                (String) statusBox.getSelectedItem();
-//
-//        // VALIDATE BASIC FIELDS
-//        if (caseNumber.isEmpty() ||
-//                title.isEmpty()) {
-//
-//            JOptionPane.showMessageDialog(
-//                    this,
-//                    "Case Number and Title are required!",
-//                    "Validation",
-//                    JOptionPane.WARNING_MESSAGE
-//            );
-//
-//            return;
-//        }
-//
-//        // CHECK DETECTIVE
-//        if (detectives.isEmpty()) {
-//
-//            JOptionPane.showMessageDialog(
-//                    this,
-//                    "No detectives are available. Please add a detective first.",
-//                    "Validation",
-//                    JOptionPane.WARNING_MESSAGE
-//            );
-//
-//            return;
-//        }
-//
-//        int selectedIndex =
-//                detectiveBox.getSelectedIndex();
-//
-//        if (selectedIndex < 0 ||
-//                selectedIndex >= detectives.size()) {
-//
-//            JOptionPane.showMessageDialog(
-//                    this,
-//                    "Please select a detective.",
-//                    "Validation",
-//                    JOptionPane.WARNING_MESSAGE
-//            );
-//
-//            return;
-//        }
-//
-//        Detective selectedDetective =
-//                detectives.get(selectedIndex);
-//
-//        int detectiveId =
-//                selectedDetective.getPersonId();
-//
-//        // CREATE CASE OBJECT
-//        Case newCase =
-//                new Case();
-//
-//        newCase.setCaseNumber(
-//                caseNumber
-//        );
-//
-//        newCase.setTitle(
-//                title
-//        );
-//
-//        newCase.setDescription(
-//                description
-//        );
-//
-//        newCase.setStatus(
-//                status
-//        );
-//
-//        newCase.setDateCreated(
-//                LocalDate.now()
-//        );
-//
-//        newCase.setDetectiveId(
-//                detectiveId
-//        );
-//
-//        // SAVE TO DATABASE
-//        CaseDAO caseDAO =
-//                new CaseDAO();
-//
-//        boolean success =
-//                caseDAO.addCase(newCase);
-//
-//        if (success) {
-//
-//            JOptionPane.showMessageDialog(
-//                    this,
-//                    "Case added successfully!",
-//                    "Success",
-//                    JOptionPane.INFORMATION_MESSAGE
-//            );
-//
-//            // CLEAR FORM
-//            caseNumberField.setText("");
-//            titleField.setText("");
-//            descriptionArea.setText("");
-//            statusBox.setSelectedIndex(0);
-//
-//        } else {
-//
-//            JOptionPane.showMessageDialog(
-//                    this,
-//                    "Failed to add case!",
-//                    "Error",
-//                    JOptionPane.ERROR_MESSAGE
-//            );
-//        }
-//    }
-//
-//    // VIEW ALL CASES
-//    private void viewCases() {
-//
-//        CaseDAO caseDAO =
-//                new CaseDAO();
-//
-//        List<Case> cases =
-//                caseDAO.getAllCases();
-//
-//        if (cases.isEmpty()) {
-//
-//            JOptionPane.showMessageDialog(
-//                    this,
-//                    "No cases found."
-//            );
-//
-//            return;
-//        }
-//
-//        StringBuilder caseDetails =
-//                new StringBuilder();
-//
-//        for (Case caseData : cases) {
-//
-//            caseDetails.append(
-//                            "Case ID: "
-//                    )
-//                    .append(
-//                            caseData.getCaseId()
-//                    )
-//                    .append("\n");
-//
-//            caseDetails.append(
-//                            "Case Number: "
-//                    )
-//                    .append(
-//                            caseData.getCaseNumber()
-//                    )
-//                    .append("\n");
-//
-//            caseDetails.append(
-//                            "Title: "
-//                    )
-//                    .append(
-//                            caseData.getTitle()
-//                    )
-//                    .append("\n");
-//
-//            caseDetails.append(
-//                            "Description: "
-//                    )
-//                    .append(
-//                            caseData.getDescription()
-//                    )
-//                    .append("\n");
-//
-//            caseDetails.append(
-//                            "Status: "
-//                    )
-//                    .append(
-//                            caseData.getStatus()
-//                    )
-//                    .append("\n");
-//
-//            caseDetails.append(
-//                            "Date Created: "
-//                    )
-//                    .append(
-//                            caseData.getDateCreated()
-//                    )
-//                    .append("\n");
-//
-//            caseDetails.append(
-//                            "Detective ID: "
-//                    )
-//                    .append(
-//                            caseData.getDetectiveId()
-//                    )
-//                    .append("\n");
-//
-//            caseDetails.append(
-//                    "--------------------------------\n"
-//            );
-//        }
-//
-//        JTextArea textArea =
-//                new JTextArea(
-//                        caseDetails.toString()
-//                );
-//
-//        textArea.setEditable(false);
-//
-//        textArea.setFont(
-//                new Font("Arial", Font.PLAIN, 14)
-//        );
-//
-//        JScrollPane scrollPane =
-//                new JScrollPane(textArea);
-//
-//        scrollPane.setPreferredSize(
-//                new Dimension(550, 400)
-//        );
-//
-//        JOptionPane.showMessageDialog(
-//                this,
-//                scrollPane,
-//                "All Cases",
-//                JOptionPane.INFORMATION_MESSAGE
-//        );
-//    }
-//}
-
-
 package gui;
 
 import dao.CaseDAO;
+import dao.CaseLinkDAO;
 import dao.DetectiveDAO;
+import dao.SuspectDAO;
+import dao.WitnessDAO;
+
 import model.Case;
 import model.Detective;
+import model.Suspect;
+import model.Witness;
 
 import javax.swing.*;
 import java.awt.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 public class CaseFrame extends JFrame {
@@ -442,10 +33,15 @@ public class CaseFrame extends JFrame {
     private JButton updateButton;
     private JButton viewButton;
 
+    private JButton linkSuspectButton;
+    private JButton linkWitnessButton;
+    private JButton viewLinkedSuspectsButton;
+    private JButton viewLinkedWitnessesButton;
+
     public CaseFrame() {
 
         setTitle("Case Management");
-        setSize(700, 620);
+        setSize(780, 700);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -475,28 +71,19 @@ public class CaseFrame extends JFrame {
         // CASE SELECTION
         caseBox = new JComboBox<>();
 
-        formPanel.add(
-                new JLabel("Select Case:")
-        );
-
+        formPanel.add(new JLabel("Select Case:"));
         formPanel.add(caseBox);
 
         // CASE NUMBER
         caseNumberField = new JTextField();
 
-        formPanel.add(
-                new JLabel("Case Number:")
-        );
-
+        formPanel.add(new JLabel("Case Number:"));
         formPanel.add(caseNumberField);
 
         // TITLE
         titleField = new JTextField();
 
-        formPanel.add(
-                new JLabel("Title:")
-        );
-
+        formPanel.add(new JLabel("Title:"));
         formPanel.add(titleField);
 
         // DESCRIPTION
@@ -504,13 +91,8 @@ public class CaseFrame extends JFrame {
         descriptionArea.setLineWrap(true);
         descriptionArea.setWrapStyleWord(true);
 
-        formPanel.add(
-                new JLabel("Description:")
-        );
-
-        formPanel.add(
-                new JScrollPane(descriptionArea)
-        );
+        formPanel.add(new JLabel("Description:"));
+        formPanel.add(new JScrollPane(descriptionArea));
 
         // STATUS
         statusBox = new JComboBox<>(
@@ -521,84 +103,93 @@ public class CaseFrame extends JFrame {
                 }
         );
 
-        formPanel.add(
-                new JLabel("Status:")
-        );
-
+        formPanel.add(new JLabel("Status:"));
         formPanel.add(statusBox);
 
-        // DETECTIVE
+        // ASSIGNED DETECTIVE
         detectiveBox = new JComboBox<>();
 
-        formPanel.add(
-                new JLabel("Assigned Detective:")
-        );
-
+        formPanel.add(new JLabel("Assigned Detective:"));
         formPanel.add(detectiveBox);
 
         // LOAD DATA
         loadDetectives();
         loadCases();
 
-        // BUTTONS
+        // CREATE BUTTONS
         addButton = new JButton("Add Case");
         updateButton = new JButton("Update Case");
         viewButton = new JButton("View Cases");
 
-        addButton.setFont(
-                new Font("Arial", Font.BOLD, 14)
-        );
+        linkSuspectButton = new JButton("Link Suspect");
+        linkWitnessButton = new JButton("Link Witness");
 
-        updateButton.setFont(
-                new Font("Arial", Font.BOLD, 14)
-        );
+        viewLinkedSuspectsButton =
+                new JButton("View Linked Suspects");
 
-        viewButton.setFont(
-                new Font("Arial", Font.BOLD, 14)
-        );
+        viewLinkedWitnessesButton =
+                new JButton("View Linked Witnesses");
 
-        JPanel buttonPanel = new JPanel();
+        JButton[] buttons = {
+                addButton,
+                updateButton,
+                viewButton,
+                linkSuspectButton,
+                linkWitnessButton,
+                viewLinkedSuspectsButton,
+                viewLinkedWitnessesButton
+        };
+
+        for (JButton button : buttons) {
+            button.setFont(
+                    new Font("Arial", Font.BOLD, 13)
+            );
+            button.setFocusPainted(false);
+        }
+
+        // BUTTON PANEL
+        JPanel buttonPanel = new JPanel(
+                new GridLayout(0, 3, 10, 10)
+        );
 
         buttonPanel.setBorder(
-                BorderFactory.createEmptyBorder(10, 10, 15, 10)
+                BorderFactory.createEmptyBorder(10, 25, 20, 25)
         );
 
-        buttonPanel.add(addButton);
-        buttonPanel.add(updateButton);
-        buttonPanel.add(viewButton);
+        for (JButton button : buttons) {
+            buttonPanel.add(button);
+        }
 
         // MAIN LAYOUT
         setLayout(new BorderLayout());
 
-        add(
-                headingLabel,
-                BorderLayout.NORTH
+        add(headingLabel, BorderLayout.NORTH);
+        add(formPanel, BorderLayout.CENTER);
+        add(buttonPanel, BorderLayout.SOUTH);
+
+        // EXISTING BUTTON ACTIONS
+        addButton.addActionListener(e -> addCase());
+        updateButton.addActionListener(e -> updateCase());
+        viewButton.addActionListener(e -> viewCases());
+
+        // NEW LINKING BUTTON ACTIONS
+        linkSuspectButton.addActionListener(
+                e -> linkSuspectToCase()
         );
 
-        add(
-                formPanel,
-                BorderLayout.CENTER
+        linkWitnessButton.addActionListener(
+                e -> linkWitnessToCase()
         );
 
-        add(
-                buttonPanel,
-                BorderLayout.SOUTH
+        viewLinkedSuspectsButton.addActionListener(
+                e -> viewLinkedSuspects()
         );
 
-        // BUTTON ACTIONS
-        addButton.addActionListener(
-                e -> addCase()
+        viewLinkedWitnessesButton.addActionListener(
+                e -> viewLinkedWitnesses()
         );
 
-        updateButton.addActionListener(
-                e -> updateCase()
-        );
-
-        viewButton.addActionListener(
-                e -> viewCases()
-        );
-
-        // LOAD SELECTED CASE DETAILS
+        // LOAD DETAILS WHEN A CASE IS SELECTED
         caseBox.addActionListener(
                 e -> loadSelectedCase()
         );
@@ -607,18 +198,16 @@ public class CaseFrame extends JFrame {
     // LOAD DETECTIVES FROM DATABASE
     private void loadDetectives() {
 
-        DetectiveDAO detectiveDAO =
-                new DetectiveDAO();
+        DetectiveDAO detectiveDAO = new DetectiveDAO();
 
-        detectives =
-                detectiveDAO.getAllDetectives();
+        detectives = detectiveDAO.getAllDetectives();
+
+        if (detectives == null) {
+            detectives = new ArrayList<>();
+        }
 
         if (detectives.isEmpty()) {
-
-            detectiveBox.addItem(
-                    "No detectives available"
-            );
-
+            detectiveBox.addItem("No detectives available");
             return;
         }
 
@@ -635,24 +224,18 @@ public class CaseFrame extends JFrame {
     // LOAD CASES FROM DATABASE
     private void loadCases() {
 
-        CaseDAO caseDAO =
-                new CaseDAO();
+        CaseDAO caseDAO = new CaseDAO();
 
-        cases =
-                caseDAO.getAllCases();
+        cases = caseDAO.getAllCases();
+
+        if (cases == null) {
+            cases = new ArrayList<>();
+        }
 
         caseBox.removeAllItems();
 
-        if (cases.isEmpty()) {
-
-            caseBox.addItem(
-                    "No cases available"
-            );
-
-            clearForm();
-
-            return;
-        }
+        // Placeholder at index 0
+        caseBox.addItem("-- Select a case --");
 
         for (Case caseData : cases) {
 
@@ -663,34 +246,28 @@ public class CaseFrame extends JFrame {
             );
         }
 
-        if (!cases.isEmpty()) {
-
-            caseBox.setSelectedIndex(0);
-
-            loadSelectedCase();
-        }
+        // Keep the form empty when the window opens
+        caseBox.setSelectedIndex(0);
+        clearForm();
     }
 
-    // LOAD SELECTED CASE INTO FORM
+    // LOAD SELECTED CASE DETAILS
     private void loadSelectedCase() {
 
+        int selectedIndex = caseBox.getSelectedIndex();
+
+        if (selectedIndex <= 0) {
+            clearForm();
+            return;
+        }
+
         if (cases == null ||
-                cases.isEmpty()) {
-
+                selectedIndex > cases.size()) {
             return;
         }
 
-        int selectedIndex =
-                caseBox.getSelectedIndex();
-
-        if (selectedIndex < 0 ||
-                selectedIndex >= cases.size()) {
-
-            return;
-        }
-
-        Case selectedCase =
-                cases.get(selectedIndex);
+        // Index 0 is the placeholder
+        Case selectedCase = cases.get(selectedIndex - 1);
 
         caseNumberField.setText(
                 selectedCase.getCaseNumber()
@@ -710,7 +287,11 @@ public class CaseFrame extends JFrame {
                 selectedCase.getStatus()
         );
 
-        // Select the assigned detective
+        // Select the detective assigned to the case
+        if (detectiveBox.getItemCount() > 0) {
+            detectiveBox.setSelectedIndex(0);
+        }
+
         for (int i = 0; i < detectives.size(); i++) {
 
             if (detectives.get(i).getPersonId()
@@ -722,7 +303,29 @@ public class CaseFrame extends JFrame {
         }
     }
 
-    // ADD CASE
+    // GET THE CASE SELECTED IN THE DROPDOWN
+    private Case getSelectedCase() {
+
+        int selectedIndex = caseBox.getSelectedIndex();
+
+        if (cases == null ||
+                selectedIndex <= 0 ||
+                selectedIndex > cases.size()) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please select a case first.",
+                    "Select Case",
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            return null;
+        }
+
+        return cases.get(selectedIndex - 1);
+    }
+
+    // ADD A NEW CASE
     private void addCase() {
 
         String caseNumber =
@@ -737,9 +340,7 @@ public class CaseFrame extends JFrame {
         String status =
                 (String) statusBox.getSelectedItem();
 
-        // VALIDATE BASIC FIELDS
-        if (caseNumber.isEmpty() ||
-                title.isEmpty()) {
+        if (caseNumber.isEmpty() || title.isEmpty()) {
 
             JOptionPane.showMessageDialog(
                     this,
@@ -751,8 +352,7 @@ public class CaseFrame extends JFrame {
             return;
         }
 
-        // CHECK DETECTIVE
-        if (detectives.isEmpty()) {
+        if (detectives == null || detectives.isEmpty()) {
 
             JOptionPane.showMessageDialog(
                     this,
@@ -764,11 +364,10 @@ public class CaseFrame extends JFrame {
             return;
         }
 
-        int selectedIndex =
-                detectiveBox.getSelectedIndex();
+        int detectiveIndex = detectiveBox.getSelectedIndex();
 
-        if (selectedIndex < 0 ||
-                selectedIndex >= detectives.size()) {
+        if (detectiveIndex < 0 ||
+                detectiveIndex >= detectives.size()) {
 
             JOptionPane.showMessageDialog(
                     this,
@@ -781,45 +380,23 @@ public class CaseFrame extends JFrame {
         }
 
         Detective selectedDetective =
-                detectives.get(selectedIndex);
+                detectives.get(detectiveIndex);
 
-        int detectiveId =
-                selectedDetective.getPersonId();
+        Case newCase = new Case();
 
-        // CREATE CASE OBJECT
-        Case newCase =
-                new Case();
-
-        newCase.setCaseNumber(
-                caseNumber
-        );
-
-        newCase.setTitle(
-                title
-        );
-
-        newCase.setDescription(
-                description
-        );
-
-        newCase.setStatus(
-                status
-        );
-
-        newCase.setDateCreated(
-                LocalDate.now()
-        );
+        newCase.setCaseNumber(caseNumber);
+        newCase.setTitle(title);
+        newCase.setDescription(description);
+        newCase.setStatus(status);
+        newCase.setDateCreated(LocalDate.now());
 
         newCase.setDetectiveId(
-                detectiveId
+                selectedDetective.getPersonId()
         );
 
-        // SAVE TO DATABASE
-        CaseDAO caseDAO =
-                new CaseDAO();
+        CaseDAO caseDAO = new CaseDAO();
 
-        boolean success =
-                caseDAO.addCase(newCase);
+        boolean success = caseDAO.addCase(newCase);
 
         if (success) {
 
@@ -830,52 +407,26 @@ public class CaseFrame extends JFrame {
                     JOptionPane.INFORMATION_MESSAGE
             );
 
-            clearForm();
-
             loadCases();
 
         } else {
 
             JOptionPane.showMessageDialog(
                     this,
-                    "Failed to add case!\n" +
-                            "Make sure the case number is unique.",
+                    "Failed to add case!\n"
+                            + "Make sure the case number is unique.",
                     "Error",
                     JOptionPane.ERROR_MESSAGE
             );
         }
     }
 
-    // UPDATE CASE
+    // UPDATE AN EXISTING CASE
     private void updateCase() {
 
-        // CHECK IF CASES EXIST
-        if (cases == null ||
-                cases.isEmpty()) {
+        Case selectedCase = getSelectedCase();
 
-            JOptionPane.showMessageDialog(
-                    this,
-                    "No cases are available to update.",
-                    "Validation",
-                    JOptionPane.WARNING_MESSAGE
-            );
-
-            return;
-        }
-
-        int selectedCaseIndex =
-                caseBox.getSelectedIndex();
-
-        if (selectedCaseIndex < 0 ||
-                selectedCaseIndex >= cases.size()) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Please select a case.",
-                    "Validation",
-                    JOptionPane.WARNING_MESSAGE
-            );
-
+        if (selectedCase == null) {
             return;
         }
 
@@ -891,9 +442,7 @@ public class CaseFrame extends JFrame {
         String status =
                 (String) statusBox.getSelectedItem();
 
-        // VALIDATE BASIC FIELDS
-        if (caseNumber.isEmpty() ||
-                title.isEmpty()) {
+        if (caseNumber.isEmpty() || title.isEmpty()) {
 
             JOptionPane.showMessageDialog(
                     this,
@@ -905,8 +454,7 @@ public class CaseFrame extends JFrame {
             return;
         }
 
-        // CHECK DETECTIVE
-        if (detectives.isEmpty()) {
+        if (detectives == null || detectives.isEmpty()) {
 
             JOptionPane.showMessageDialog(
                     this,
@@ -918,8 +466,7 @@ public class CaseFrame extends JFrame {
             return;
         }
 
-        int detectiveIndex =
-                detectiveBox.getSelectedIndex();
+        int detectiveIndex = detectiveBox.getSelectedIndex();
 
         if (detectiveIndex < 0 ||
                 detectiveIndex >= detectives.size()) {
@@ -934,40 +481,21 @@ public class CaseFrame extends JFrame {
             return;
         }
 
-        // GET ORIGINAL CASE
-        Case selectedCase =
-                cases.get(selectedCaseIndex);
-
         Detective selectedDetective =
                 detectives.get(detectiveIndex);
 
-        // UPDATE OBJECT
-        selectedCase.setCaseNumber(
-                caseNumber
-        );
-
-        selectedCase.setTitle(
-                title
-        );
-
-        selectedCase.setDescription(
-                description
-        );
-
-        selectedCase.setStatus(
-                status
-        );
+        selectedCase.setCaseNumber(caseNumber);
+        selectedCase.setTitle(title);
+        selectedCase.setDescription(description);
+        selectedCase.setStatus(status);
 
         selectedCase.setDetectiveId(
                 selectedDetective.getPersonId()
         );
 
-        // UPDATE DATABASE
-        CaseDAO caseDAO =
-                new CaseDAO();
+        CaseDAO caseDAO = new CaseDAO();
 
-        boolean success =
-                caseDAO.updateCase(selectedCase);
+        boolean success = caseDAO.updateCase(selectedCase);
 
         if (success) {
 
@@ -978,40 +506,321 @@ public class CaseFrame extends JFrame {
                     JOptionPane.INFORMATION_MESSAGE
             );
 
-            // REFRESH CASE LIST
             loadCases();
 
         } else {
 
+            loadCases();
+
             JOptionPane.showMessageDialog(
                     this,
-                    "Failed to update case!\n" +
-                            "Make sure the case number is unique.",
+                    "Failed to update case!\n"
+                            + "Make sure the case number is unique.",
                     "Error",
                     JOptionPane.ERROR_MESSAGE
             );
         }
     }
 
-    // CLEAR FORM
+    // LINK AN EXISTING SUSPECT TO THE SELECTED CASE
+    private void linkSuspectToCase() {
+
+        Case selectedCase = getSelectedCase();
+
+        if (selectedCase == null) {
+            return;
+        }
+
+        SuspectDAO suspectDAO = new SuspectDAO();
+
+        List<Suspect> suspects = suspectDAO.getAllSuspects();
+
+        if (suspects == null || suspects.isEmpty()) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "No suspects found. Please add a suspect first.",
+                    "No Suspects",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
+            return;
+        }
+
+        JComboBox<String> suspectBox = new JComboBox<>();
+
+        for (Suspect suspect : suspects) {
+
+            suspectBox.addItem(
+                    suspect.getPersonId()
+                            + " - "
+                            + suspect.getName()
+            );
+        }
+
+        int choice = JOptionPane.showConfirmDialog(
+                this,
+                suspectBox,
+                "Select a Suspect for "
+                        + selectedCase.getCaseNumber(),
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE
+        );
+
+        if (choice != JOptionPane.OK_OPTION) {
+            return;
+        }
+
+        int suspectIndex = suspectBox.getSelectedIndex();
+
+        if (suspectIndex < 0 ||
+                suspectIndex >= suspects.size()) {
+            return;
+        }
+
+        Suspect selectedSuspect = suspects.get(suspectIndex);
+
+        CaseLinkDAO caseLinkDAO = new CaseLinkDAO();
+
+        boolean success = caseLinkDAO.linkSuspectToCase(
+                selectedCase.getCaseId(),
+                selectedSuspect.getPersonId()
+        );
+
+        if (success) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    selectedSuspect.getName()
+                            + " has been linked to "
+                            + selectedCase.getCaseNumber()
+                            + ".\nIf already linked, no duplicate was created.",
+                    "Suspect Linked",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
+        } else {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Could not link the suspect to this case.",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+
+    // LINK AN EXISTING WITNESS TO THE SELECTED CASE
+    private void linkWitnessToCase() {
+
+        Case selectedCase = getSelectedCase();
+
+        if (selectedCase == null) {
+            return;
+        }
+
+        WitnessDAO witnessDAO = new WitnessDAO();
+
+        List<Witness> witnesses = witnessDAO.getAllWitnesses();
+
+        if (witnesses == null || witnesses.isEmpty()) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "No witnesses found. Please add a witness first.",
+                    "No Witnesses",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
+            return;
+        }
+
+        JComboBox<String> witnessBox = new JComboBox<>();
+
+        for (Witness witness : witnesses) {
+
+            witnessBox.addItem(
+                    witness.getPersonId()
+                            + " - "
+                            + witness.getName()
+            );
+        }
+
+        int choice = JOptionPane.showConfirmDialog(
+                this,
+                witnessBox,
+                "Select a Witness for "
+                        + selectedCase.getCaseNumber(),
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE
+        );
+
+        if (choice != JOptionPane.OK_OPTION) {
+            return;
+        }
+
+        int witnessIndex = witnessBox.getSelectedIndex();
+
+        if (witnessIndex < 0 ||
+                witnessIndex >= witnesses.size()) {
+            return;
+        }
+
+        Witness selectedWitness = witnesses.get(witnessIndex);
+
+        CaseLinkDAO caseLinkDAO = new CaseLinkDAO();
+
+        boolean success = caseLinkDAO.linkWitnessToCase(
+                selectedCase.getCaseId(),
+                selectedWitness.getPersonId()
+        );
+
+        if (success) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    selectedWitness.getName()
+                            + " has been linked to "
+                            + selectedCase.getCaseNumber()
+                            + ".\nIf already linked, no duplicate was created.",
+                    "Witness Linked",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
+        } else {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Could not link the witness to this case.",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+
+    // VIEW SUSPECTS LINKED TO THE SELECTED CASE
+    private void viewLinkedSuspects() {
+
+        Case selectedCase = getSelectedCase();
+
+        if (selectedCase == null) {
+            return;
+        }
+
+        CaseLinkDAO caseLinkDAO = new CaseLinkDAO();
+
+        List<String> linkedSuspects =
+                caseLinkDAO.getSuspectsForCase(
+                        selectedCase.getCaseId()
+                );
+
+        showLinkedRecords(
+                linkedSuspects,
+                "Linked Suspects - "
+                        + selectedCase.getCaseNumber(),
+                "No suspects are linked to this case yet."
+        );
+    }
+
+    // VIEW WITNESSES LINKED TO THE SELECTED CASE
+    private void viewLinkedWitnesses() {
+
+        Case selectedCase = getSelectedCase();
+
+        if (selectedCase == null) {
+            return;
+        }
+
+        CaseLinkDAO caseLinkDAO = new CaseLinkDAO();
+
+        List<String> linkedWitnesses =
+                caseLinkDAO.getWitnessesForCase(
+                        selectedCase.getCaseId()
+                );
+
+        showLinkedRecords(
+                linkedWitnesses,
+                "Linked Witnesses - "
+                        + selectedCase.getCaseNumber(),
+                "No witnesses are linked to this case yet."
+        );
+    }
+
+    // DISPLAY LINKED RECORDS
+    private void showLinkedRecords(
+            List<String> records,
+            String windowTitle,
+            String emptyMessage) {
+
+        if (records == null || records.isEmpty()) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    emptyMessage,
+                    windowTitle,
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
+            return;
+        }
+
+        StringBuilder details = new StringBuilder();
+
+        for (String record : records) {
+
+            details.append(record)
+                    .append("\n")
+                    .append("--------------------------------\n\n");
+        }
+
+        JTextArea textArea = new JTextArea(
+                details.toString()
+        );
+
+        textArea.setEditable(false);
+        textArea.setLineWrap(true);
+        textArea.setWrapStyleWord(true);
+
+        textArea.setFont(
+                new Font("Arial", Font.PLAIN, 14)
+        );
+
+        JScrollPane scrollPane = new JScrollPane(textArea);
+
+        scrollPane.setPreferredSize(
+                new Dimension(500, 350)
+        );
+
+        JOptionPane.showMessageDialog(
+                this,
+                scrollPane,
+                windowTitle,
+                JOptionPane.INFORMATION_MESSAGE
+        );
+    }
+
+    // CLEAR THE FORM
     private void clearForm() {
 
         caseNumberField.setText("");
         titleField.setText("");
         descriptionArea.setText("");
+
         statusBox.setSelectedIndex(0);
+
+        if (detectiveBox.getItemCount() > 0) {
+            detectiveBox.setSelectedIndex(0);
+        }
     }
 
     // VIEW ALL CASES
     private void viewCases() {
 
-        CaseDAO caseDAO =
-                new CaseDAO();
+        CaseDAO caseDAO = new CaseDAO();
 
-        List<Case> cases =
-                caseDAO.getAllCases();
+        List<Case> allCases = caseDAO.getAllCases();
 
-        if (cases.isEmpty()) {
+        if (allCases == null || allCases.isEmpty()) {
 
             JOptionPane.showMessageDialog(
                     this,
@@ -1021,96 +830,57 @@ public class CaseFrame extends JFrame {
             return;
         }
 
-        StringBuilder caseDetails =
-                new StringBuilder();
+        StringBuilder details = new StringBuilder();
 
-        caseDetails.append(
-                "CASE RECORDS\n"
-        );
+        details.append("CASE RECORDS\n");
+        details.append("================================\n\n");
 
-        caseDetails.append(
-                "================================\n\n"
-        );
+        for (Case caseData : allCases) {
 
-        for (Case caseData : cases) {
-
-            caseDetails.append(
-                            "Case ID: "
-                    )
-                    .append(
-                            caseData.getCaseId()
-                    )
+            details.append("Case ID: ")
+                    .append(caseData.getCaseId())
                     .append("\n");
 
-            caseDetails.append(
-                            "Case Number: "
-                    )
-                    .append(
-                            caseData.getCaseNumber()
-                    )
+            details.append("Case Number: ")
+                    .append(caseData.getCaseNumber())
                     .append("\n");
 
-            caseDetails.append(
-                            "Title: "
-                    )
-                    .append(
-                            caseData.getTitle()
-                    )
+            details.append("Title: ")
+                    .append(caseData.getTitle())
                     .append("\n");
 
-            caseDetails.append(
-                            "Description: "
-                    )
-                    .append(
-                            caseData.getDescription()
-                    )
+            details.append("Description: ")
+                    .append(caseData.getDescription())
                     .append("\n");
 
-            caseDetails.append(
-                            "Status: "
-                    )
-                    .append(
-                            caseData.getStatus()
-                    )
+            details.append("Status: ")
+                    .append(caseData.getStatus())
                     .append("\n");
 
-            caseDetails.append(
-                            "Date Created: "
-                    )
-                    .append(
-                            caseData.getDateCreated()
-                    )
+            details.append("Date Created: ")
+                    .append(caseData.getDateCreated())
                     .append("\n");
 
-            caseDetails.append(
-                            "Detective ID: "
-                    )
-                    .append(
-                            caseData.getDetectiveId()
-                    )
+            details.append("Detective ID: ")
+                    .append(caseData.getDetectiveId())
                     .append("\n");
 
-            caseDetails.append(
-                    "--------------------------------\n"
-            );
+            details.append("--------------------------------\n");
         }
 
-        JTextArea textArea =
-                new JTextArea(
-                        caseDetails.toString()
-                );
+        JTextArea textArea = new JTextArea(
+                details.toString()
+        );
 
         textArea.setEditable(false);
+        textArea.setLineWrap(true);
+        textArea.setWrapStyleWord(true);
 
         textArea.setFont(
                 new Font("Arial", Font.PLAIN, 14)
         );
 
-        textArea.setLineWrap(true);
-        textArea.setWrapStyleWord(true);
-
-        JScrollPane scrollPane =
-                new JScrollPane(textArea);
+        JScrollPane scrollPane = new JScrollPane(textArea);
 
         scrollPane.setPreferredSize(
                 new Dimension(550, 400)

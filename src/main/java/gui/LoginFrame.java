@@ -1,3 +1,4 @@
+
 package gui;
 
 import dao.UserDAO;
@@ -16,219 +17,142 @@ public class LoginFrame extends JFrame {
 
         setTitle("Crime Investigation Management System - Login");
         setSize(600, 420);
+        setMinimumSize(new Dimension(500, 380));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // =========================
-        // TITLE
-        // =========================
+        // MAIN PANEL
+        JPanel mainPanel = new JPanel(new BorderLayout(0, 0));
+        mainPanel.setBackground(new Color(245, 245, 245));
 
+        // TITLE
         JLabel titleLabel = new JLabel(
-                "<html><center>" +
-                        "CRIME INVESTIGATION<br>" +
-                        "MANAGEMENT SYSTEM" +
-                        "</center></html>",
+                "<html><center>"
+                        + "CRIME INVESTIGATION<br>"
+                        + "MANAGEMENT SYSTEM"
+                        + "</center></html>",
                 SwingConstants.CENTER
         );
 
-        titleLabel.setFont(
-                new Font("Arial", Font.BOLD, 22)
-        );
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 22));
 
         JLabel subtitleLabel = new JLabel(
                 "Secure Login",
                 SwingConstants.CENTER
         );
 
-        subtitleLabel.setFont(
-                new Font("Arial", Font.PLAIN, 15)
-        );
+        subtitleLabel.setFont(new Font("Arial", Font.PLAIN, 16));
 
         JPanel titlePanel = new JPanel(
-                new GridLayout(2, 1, 5, 5)
+                new GridLayout(2, 1, 0, 8)
         );
 
+        titlePanel.setBackground(mainPanel.getBackground());
         titlePanel.setBorder(
-                BorderFactory.createEmptyBorder(
-                        25, 20, 15, 20
-                )
+                BorderFactory.createEmptyBorder(25, 15, 5, 15)
         );
 
         titlePanel.add(titleLabel);
         titlePanel.add(subtitleLabel);
 
-        // =========================
+        mainPanel.add(titlePanel, BorderLayout.NORTH);
+
         // LOGIN FORM
-        // =========================
+        JLabel usernameLabel = new JLabel("Username:");
+        JLabel passwordLabel = new JLabel("Password:");
 
-        JLabel usernameLabel =
-                new JLabel("Username:");
+        usernameLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        passwordLabel.setFont(new Font("Arial", Font.BOLD, 14));
 
-        JLabel passwordLabel =
-                new JLabel("Password:");
+        usernameField = new JTextField(18);
+        passwordField = new JPasswordField(18);
 
-        usernameLabel.setFont(
-                new Font("Arial", Font.BOLD, 14)
-        );
+        usernameField.setPreferredSize(new Dimension(220, 35));
+        passwordField.setPreferredSize(new Dimension(220, 35));
 
-        passwordLabel.setFont(
-                new Font("Arial", Font.BOLD, 14)
-        );
+        loginButton = new JButton("Login");
+        loginButton.setFont(new Font("Arial", Font.BOLD, 14));
+        loginButton.setPreferredSize(new Dimension(140, 42));
 
-        usernameField =
-                new JTextField();
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        formPanel.setBackground(mainPanel.getBackground());
 
-        passwordField =
-                new JPasswordField();
-
-        usernameField.setPreferredSize(
-                new Dimension(220, 35)
-        );
-
-        passwordField.setPreferredSize(
-                new Dimension(220, 35)
-        );
-
-        loginButton =
-                new JButton("Login");
-
-        loginButton.setFont(
-                new Font("Arial", Font.BOLD, 14)
-        );
-
-        loginButton.setPreferredSize(
-                new Dimension(120, 40)
-        );
-
-        // Form using GridBagLayout
-        JPanel formPanel =
-                new JPanel(new GridBagLayout());
-
+        // Keep the form compact even when the window is maximized.
         formPanel.setBorder(
-                BorderFactory.createEmptyBorder(
-                        15, 80, 15, 80
-                )
+                BorderFactory.createEmptyBorder(5, 20, 5, 20)
         );
 
-        GridBagConstraints gbc =
-                new GridBagConstraints();
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.anchor = GridBagConstraints.CENTER;
 
-        gbc.insets =
-                new Insets(10, 10, 10, 10);
-
-        gbc.anchor =
-                GridBagConstraints.CENTER;
-
-        // Username label
         gbc.gridx = 0;
         gbc.gridy = 0;
+        formPanel.add(usernameLabel, gbc);
 
-        formPanel.add(
-                usernameLabel,
-                gbc
-        );
-
-        // Username field
         gbc.gridx = 1;
+        formPanel.add(usernameField, gbc);
 
-        formPanel.add(
-                usernameField,
-                gbc
-        );
-
-        // Password label
         gbc.gridx = 0;
         gbc.gridy = 1;
+        formPanel.add(passwordLabel, gbc);
 
-        formPanel.add(
-                passwordLabel,
-                gbc
-        );
-
-        // Password field
         gbc.gridx = 1;
+        formPanel.add(passwordField, gbc);
 
-        formPanel.add(
-                passwordField,
-                gbc
-        );
-
-        // Login button
         gbc.gridx = 1;
         gbc.gridy = 2;
+        gbc.insets = new Insets(8, 10, 5, 10);
+        formPanel.add(loginButton, gbc);
 
-        formPanel.add(
-                loginButton,
-                gbc
-        );
+        // Put the compact form in the center of the available area.
+        JPanel centerPanel = new JPanel(new GridBagLayout());
+        centerPanel.setBackground(mainPanel.getBackground());
 
-        // =========================
+        GridBagConstraints formConstraints = new GridBagConstraints();
+
+        formConstraints.gridx = 0;
+        formConstraints.gridy = 0;
+        formConstraints.weighty = 1.0;
+        formConstraints.anchor = GridBagConstraints.NORTH;
+        formConstraints.insets = new Insets(25, 0, 0, 0);
+
+        centerPanel.add(formPanel, formConstraints);
+
+        mainPanel.add(centerPanel, BorderLayout.CENTER);
+
         // FOOTER
-        // =========================
-
         JLabel footerLabel = new JLabel(
                 "Authorized users only",
                 SwingConstants.CENTER
         );
 
-        footerLabel.setFont(
-                new Font("Arial", Font.ITALIC, 12)
-        );
-
+        footerLabel.setFont(new Font("Arial", Font.ITALIC, 12));
         footerLabel.setBorder(
-                BorderFactory.createEmptyBorder(
-                        5, 10, 15, 10
-                )
+                BorderFactory.createEmptyBorder(5, 10, 15, 10)
         );
 
-        // =========================
-        // MAIN LAYOUT
-        // =========================
+        mainPanel.add(footerLabel, BorderLayout.SOUTH);
 
-        setLayout(
-                new BorderLayout()
-        );
+        setContentPane(mainPanel);
 
-        add(
-                titlePanel,
-                BorderLayout.NORTH
-        );
+        // LOGIN ACTIONS
+        loginButton.addActionListener(e -> login());
 
-        add(
-                formPanel,
-                BorderLayout.CENTER
-        );
+        passwordField.addActionListener(e -> login());
 
-        add(
-                footerLabel,
-                BorderLayout.SOUTH
-        );
-
-        // =========================
-        // LOGIN ACTION
-        // =========================
-
-        loginButton.addActionListener(
-                e -> login()
-        );
-
-        passwordField.addActionListener(
-                e -> login()
-        );
+        // Open as a normal centered window, not maximized.
+        setLocationRelativeTo(null);
     }
 
     private void login() {
 
-        String username =
-                usernameField.getText().trim();
+        String username = usernameField.getText().trim();
 
         String password =
-                new String(
-                        passwordField.getPassword()
-                );
+                new String(passwordField.getPassword());
 
-        if (username.isEmpty() ||
-                password.isEmpty()) {
+        if (username.isEmpty() || password.isEmpty()) {
 
             JOptionPane.showMessageDialog(
                     this,
@@ -240,14 +164,9 @@ public class LoginFrame extends JFrame {
             return;
         }
 
-        UserDAO userDAO =
-                new UserDAO();
+        UserDAO userDAO = new UserDAO();
 
-        User user =
-                userDAO.login(
-                        username,
-                        password
-                );
+        User user = userDAO.login(username, password);
 
         if (user != null) {
 
@@ -278,89 +197,3 @@ public class LoginFrame extends JFrame {
         }
     }
 }
-
-//package gui;
-//
-//import dao.UserDAO;
-//import model.User;
-//
-//import javax.swing.*;
-//import java.awt.*;
-//
-//public class LoginFrame extends JFrame {
-//
-//    private JTextField usernameField;
-//    private JPasswordField passwordField;
-//    private JButton loginButton;
-//
-//    public LoginFrame() {
-//
-//        setTitle("Crime Investigation Management System - Login");
-//        setSize(400, 250);
-//        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//        setLocationRelativeTo(null);
-//
-//        JPanel panel = new JPanel();
-//        panel.setLayout(new GridLayout(4, 2, 10, 10));
-//
-//        JLabel usernameLabel = new JLabel("Username:");
-//        JLabel passwordLabel = new JLabel("Password:");
-//
-//        usernameField = new JTextField();
-//        passwordField = new JPasswordField();
-//
-//        loginButton = new JButton("Login");
-//
-//        panel.setBorder(
-//                BorderFactory.createEmptyBorder(30, 30, 30, 30)
-//        );
-//
-//        panel.add(usernameLabel);
-//        panel.add(usernameField);
-//
-//        panel.add(passwordLabel);
-//        panel.add(passwordField);
-//
-//        panel.add(new JLabel());
-//        panel.add(loginButton);
-//
-//        add(panel);
-//
-//        loginButton.addActionListener(e -> login());
-//    }
-//
-//    private void login() {
-//
-//        String username = usernameField.getText();
-//        String password = new String(passwordField.getPassword());
-//
-//        UserDAO userDAO = new UserDAO();
-//
-//        User user = userDAO.login(username, password);
-//
-//        if (user != null) {
-//
-//            JOptionPane.showMessageDialog(
-//                    this,
-//                    "Login successful!\nWelcome, " + user.getUsername()
-//            );
-//
-//            DashboardFrame dashboardFrame =
-//                    new DashboardFrame(user.getUsername(), user.getRole());
-//
-//            dashboardFrame.setVisible(true);
-//
-//            dispose();
-//
-//        } else {
-//
-//            JOptionPane.showMessageDialog(
-//                    this,
-//                    "Invalid username or password!",
-//                    "Login Failed",
-//                    JOptionPane.ERROR_MESSAGE
-//            );
-//        }
-//    }
-//}
-

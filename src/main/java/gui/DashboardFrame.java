@@ -99,9 +99,13 @@ public class DashboardFrame extends JFrame {
             );
         }
 
+//        JPanel buttonPanel =
+//                new JPanel(
+//                        new GridLayout(4, 2, 20, 20)
+//                );
         JPanel buttonPanel =
                 new JPanel(
-                        new GridLayout(4, 2, 20, 20)
+                        new GridLayout(0, 2, 20, 20)
                 );
 
         buttonPanel.setBorder(
@@ -118,6 +122,31 @@ public class DashboardFrame extends JFrame {
         buttonPanel.add(reportButton);
         buttonPanel.add(searchButton);
         buttonPanel.add(logoutButton);
+
+        if (role != null && role.equalsIgnoreCase("Admin")) {
+
+            JButton manageUsersButton =
+                    new JButton("Manage Users");
+            manageUsersButton.setFont(
+                    new Font("Arial", Font.BOLD, 14)
+            );
+
+            manageUsersButton.setFocusPainted(false);
+
+            manageUsersButton.setPreferredSize(
+                    new Dimension(250, 70)
+            );
+
+            manageUsersButton.addActionListener(e -> {
+                new UserManagementFrame(role);
+            });
+
+            manageUsersButton.addActionListener(e -> {
+                new UserManagementFrame(role);
+            });
+
+            buttonPanel.add(manageUsersButton);
+        }
 
         // =========================
         // FOOTER
