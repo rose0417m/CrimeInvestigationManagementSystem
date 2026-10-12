@@ -1,131 +1,183 @@
 # Crime Investigation Management System
 
-A Java-based desktop application for managing crime investigation records such as cases, detectives, suspects, witnesses, and evidence.
+A Java-based desktop application designed to manage crime investigation records, detectives, suspects, witnesses, evidence, and case-related information in a centralized MySQL database.
+
+## Project Overview
+
+The Crime Investigation Management System (CIMS) helps authorized users organize investigation records and manage the information associated with individual cases. It provides a graphical user interface for maintaining records, tracking case status, and connecting suspects and witnesses to specific cases.
+
+## Features
+
+- **Login and Authentication** — Secure login with password hashing.
+- **User Management** — Admin-only functionality for creating investigator accounts.
+- **Case Management** — Add, view, and update cases, including case numbers, descriptions, status, and assigned detectives.
+- **Detective Management** — Maintain detective records and specializations.
+- **Suspect Management** — Store suspect details such as name, age, gender, address, and phone number.
+- **Witness Management** — Maintain witness contact information and statements.
+- **Case–Suspect Linking** — Associate existing suspects with investigation cases.
+- **Case–Witness Linking** — Associate existing witnesses with investigation cases.
+- **Evidence Management** — Maintain evidence records.
+- **Search** — Search investigation records.
+- **Reports** — View case records and related investigation information.
 
 ## Technologies Used
 
-- Java
-- Java Swing
-- MySQL
-- JDBC
-- Maven
-- IntelliJ IDEA
-- Git & GitHub
-
-## Main Features
-
-- User login and authentication
-- Case management
-- Detective management
-- Suspect management
-- Witness management
-- Evidence management
-- Search investigation records
-- Generate investigation reports
-- MySQL database integration
+- **Programming Language:** Java
+- **GUI:** Java Swing
+- **Database:** MySQL
+- **Database Connectivity:** JDBC
+- **Build Tool:** Apache Maven
+- **Password Hashing:** PBKDF2
+- **Development Environment:** IntelliJ IDEA
+- **Version Control:** Git and GitHub
 
 ## Project Structure
 
 ```text
-src/main/java/
-├── dao/
-│   ├── CaseDAO.java
-│   ├── DetectiveDAO.java
-│   ├── EvidenceDAO.java
-│   ├── SuspectDAO.java
-│   ├── UserDAO.java
-│   └── WitnessDAO.java
-│
-├── database/
-│   └── DatabaseConnection.java
-│
-├── gui/
-│   ├── LoginFrame.java
-│   ├── DashboardFrame.java
-│   ├── CaseFrame.java
-│   ├── DetectiveFrame.java
-│   ├── SuspectFrame.java
-│   ├── WitnessFrame.java
-│   ├── EvidenceFrame.java
-│   ├── SearchFrame.java
-│   └── ReportFrame.java
-│
-├── model/
-│   ├── Person.java
-│   ├── User.java
-│   ├── Detective.java
-│   ├── Suspect.java
-│   ├── Witness.java
-│   ├── Case.java
-│   └── Evidence.java
-│
-└── Main.java
+CrimeInvestigationManagementSystem/
+├── src/
+│   └── main/
+│       └── java/
+│           ├── dao/
+│           │   ├── CaseDAO.java
+│           │   ├── CaseLinkDAO.java
+│           │   ├── DetectiveDAO.java
+│           │   ├── SuspectDAO.java
+│           │   ├── WitnessDAO.java
+│           │   └── UserDAO.java
+│           ├── database/
+│           │   └── DatabaseConnection.java
+│           ├── gui/
+│           │   ├── LoginFrame.java
+│           │   ├── DashboardFrame.java
+│           │   ├── CaseFrame.java
+│           │   ├── UserManagementFrame.java
+│           │   └── ...
+│           ├── model/
+│           │   └── ...
+│           └── util/
+│               └── PasswordUtil.java
+├── pom.xml
+└── README.md
+```
 
+*The structure above highlights the main components; additional classes and resources may be present in the repository.*
 
-Database
+## Prerequisites
 
-The project uses MySQL with the database:
+Install the following before running the application:
 
-crime_investigation_db
+- Java Development Kit (JDK)
+- IntelliJ IDEA or another Java IDE
+- MySQL Server
+- MySQL Workbench (optional, for managing the database)
+- Git
+- Apache Maven, or use the Maven support available in IntelliJ IDEA
 
-The database setup script is available at:
+## Getting Started
 
-database/database_setup.sql
-OOP Concepts Demonstrated
+### 1. Clone the repository
 
-The project demonstrates the following Java OOP concepts:
+Open a terminal and run:
 
-Encapsulation through private attributes and getters/setters
-Abstraction using the Person abstract class
-Inheritance using Detective, Suspect, and Witness
-Polymorphism through method overriding
-Constructors
-Exception handling
-DAO-based separation of database operations
-How to Run
-1. Set up MySQL
+```bash
+git clone https://github.com/rose0417m/CrimeInvestigationManagementSystem.git
+```
 
-Run:
+Open the downloaded project in IntelliJ IDEA and allow Maven to load its dependencies.
 
-database/database_setup.sql
+### 2. Configure the database
 
-in MySQL Workbench.
+Start your MySQL Server and create the project database:
 
-2. Configure database connection
+```sql
+CREATE DATABASE IF NOT EXISTS crime_investigation_db;
+```
 
-Create your local database connection configuration using the provided example file.
+Ensure that the database schema and tables required by the project's DAO classes have been created. The application expects the database structure to match the SQL queries used by the source code.
 
-Do not commit passwords or other credentials to GitHub.
+The case-linking functionality uses these additional tables:
 
-3. Build the project
+```sql
+USE crime_investigation_db;
 
-Using the Maven wrapper:
+CREATE TABLE IF NOT EXISTS case_suspects (
+    case_id INT NOT NULL,
+    suspect_id INT NOT NULL,
+    PRIMARY KEY (case_id, suspect_id)
+);
 
-.\mvnw.cmd clean compile
-4. Run the application
+CREATE TABLE IF NOT EXISTS case_witnesses (
+    case_id INT NOT NULL,
+    witness_id INT NOT NULL,
+    PRIMARY KEY (case_id, witness_id)
+);
+```
 
-Run:
+These tables associate existing suspect and witness records with cases.
 
-src/main/java/Main.java
+### 3. Configure the database connection
 
-The application opens with the login screen.
+Open:
 
-Default Test Account
-Username: admin
-Password: 1234
-Application Flow
-Login
-  ↓
-Dashboard
-  ↓
-Case Management
-Detective Management
-Suspect Management
-Witness Management
-Evidence Management
-Search
-Reports
+```text
+src/main/java/database/DatabaseConnection.java
+```
 
-Team Project
+Configure the MySQL connection URL, username, and password for your local MySQL Server.
 
-This project is developed as a Java OOP group project using Java Swing, MySQL and JDBC.
+Keep database credentials private. Do not commit personal passwords or other secrets to GitHub.
+
+### 4. Run the application
+
+In IntelliJ IDEA:
+
+1. Open the project and wait for Maven dependencies to finish loading.
+2. Locate `gui.LoginFrame`.
+3. Run its `main` method, or use the project's existing run configuration.
+4. Log in using an administrator account configured in your database.
+
+The dashboard provides access to the available management modules according to the application's role checks.
+
+### 5. Build the project
+
+From the project root, run:
+
+```bash
+mvn clean package
+```
+
+If the configured Maven build produces the runnable JAR, it can be launched with:
+
+```bash
+java -jar target/CrimeInvestigationManagementSystem-1.0-SNAPSHOT.jar
+```
+
+If your Maven configuration uses a different JAR filename, use the generated filename in the `target` directory.
+
+## Database Relationships
+
+The application stores investigation records in MySQL. The case management functionality supports relationships between cases and their assigned detectives.
+
+The additional linking tables support these relationships:
+
+- **Case–Suspect:** Associates a case with one or more suspects.
+- **Case–Witness:** Associates a case with one or more witnesses.
+
+A suspect or witness can be linked to more than one case. These links are stored in the database and remain available after the application is restarted.
+
+## Security
+
+The application uses password hashing for authentication and restricts account creation to administrators.
+
+This project is intended for educational and demonstration purposes. Before any real-world deployment, additional security hardening, access-control review, validation, and database security measures would be required.
+
+## Team and Contribution
+
+This project was developed as an academic software project.
+
+To contribute, fork the repository or create a branch, make your changes, and submit a pull request.
+
+## Repository
+
+GitHub: https://github.com/rose0417m/CrimeInvestigationManagementSystem
